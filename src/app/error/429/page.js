@@ -1,11 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Error429() {
   const [countdown, setCountdown] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
+    // Check: agar koi user directly aaya hai to redirect
+    if (typeof window !== "undefined") {
+      const isDirectAccess = performance?.navigation?.type === 0; // 0 = TYPE_NAVIGATE (manual)
+      if (isDirectAccess) {
+        router.push("/"); // Redirect to homepage
+        return;
+      }
+    }
+
     function update() {
       const now = new Date();
       const target = new Date();
@@ -23,7 +34,7 @@ export default function Error429() {
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [router]);
 
   return (
     <div
