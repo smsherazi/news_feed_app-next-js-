@@ -1,0 +1,94 @@
+.profile {
+  position: relative;
+}
+
+.profileIcon {
+  /* background-color: brown; */
+  border: 3px solid rgb(59, 59, 59);    
+  border-radius: 50%;
+  padding: 3;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.profile h4 {
+  text-align: center;
+  color: white;
+}
+.profile span {
+  color: white;
+  font-size: 20px;
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  /* font-weight: 800; */
+  /* background-color: r; */
+  /* padding: 3px; */
+  /* border-radius: 50%; */
+  /* width: 15px;
+    height: 15px; */
+  cursor: pointer;
+  /* display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: rotate(180deg); */
+}
+.profile span:hover {
+  color: green;
+}
+
+.profile .dropdown {
+  position: absolute;
+  top: 45px;
+  min-width: 200px;
+  padding: 5px 0px;
+  right: -10px;
+  color: white;
+  border: 1px solid rgba(192, 192, 192, 0.301);
+  border-radius: 5px;
+}
+.profile .dropdown .dropdownLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.profile .dropdown .dropdownLink a {
+  text-decoration: none;
+  color: white;
+  padding: 8px;
+  width: 100%;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.profile .dropdown .dropdownLink a:hover {
+  background-color: #14f5275b;
+}
+
+.profile .dropdown .dropdownLink .line {
+  width: 95%;
+  height: 0.5px;
+  background-color: rgba(192, 192, 192, 0.295);
+}
+
+.profile .dropdown .dropdownLink button {
+  background-color: transparent;
+  color: white;
+  border: none;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+}
+.profile .dropdown .dropdownLink button:hover {
+  background-color: #14f5275b;
+}

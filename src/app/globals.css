@@ -1,56 +1,53 @@
-body{
+body {
   background-color: #02010a;
 }
-.post-parent{
-  background-color: #060513;
-  width: 650px;
+.post-parent {
+  /* background-color: #060513; */
+  width: 500px;
   margin: auto;
   border: 1px solid rgb(28, 26, 46);
   padding: 30px;
 }
-.card{
+.card {
   background-color: #f9f9ffd5;
 }
-.custom-select {
-  background-color: #bfccf7d7;
-  /* backdrop-filter: blur(8px); */
-  border: 1px solid rgba(51, 51, 51, 0.3);
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+  -webkit-appearance: none;
+}
+.dropdown{
+  background-color: #02010a;
+}
+.dropdown .dropdown-toggle {
+  /* min-width: 150px; */
+  text-align: left;
+  background: rgba(0, 0, 0, 0);
+  color: white;
+  border: 1px solid rgba(192, 192, 192, 0.315);
+  border-radius: 5px;
+  padding: 4px;
+}
+
+.dropdown-menu {
+  min-width: 150px;
+  background-color: #02010a;
   border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(192, 192, 192, 0.247);
+}
+
+.dropdown-menu .dropdown-item {
   padding: 8px 12px;
-  /* width: 200px; */
-  font-size: 1rem;
-  color: #2e2d2d;
+  cursor: pointer;
+  color: white;
 }
 
-.serachBox{
-  background-color: #ccd8fdd7;
-  border: 1px solid #ffff;
-  border-radius: 6px;
-  margin-right: 5px;
-  padding: 10px;
+.dropdown-menu .dropdown-item:hover {
+  background-color: #14f52760;
 }
-.serachBox:focus{
-  outline: none;
-}
-.serachBox:active{
-  outline: none;
-}
-
-.custom-select:focus{
-  outline: none;
-}
-.custom-select:active{
-  outline: none;
-}
-
-.glass-navbar{
-  filter: blur(20);
-  background-color: #02010aec;
-}
-.custom-select option{
-  color: black;
-}
-
 
 /* === Fullscreen Loader === */
 .fullscreen-loader {
@@ -93,4 +90,38 @@ body{
   justify-content: center;
   align-items: center;
   padding: 20px;
+}
+
+.icon-wrapper{
+
+  position: relative;
+  display: inline-block;
+  /* margin: 10px; */
+  cursor: pointer;
+}
+
+.icon-wrapper .tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  width: auto;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+
+  position: absolute;
+  top: 100%; /* below the icon */
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.icon-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }

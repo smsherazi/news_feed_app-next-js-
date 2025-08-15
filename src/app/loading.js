@@ -24,7 +24,7 @@ export default function Loading() {
       >
         <span className="visually-hidden">Loading...</span>
       </div>
-      <p className="mt-3 small">Fetching latest headlines...</p>
+      {/* <p className="mt-3 small">Fetching latest headlines...</p> */}
     </div>
   );
 }

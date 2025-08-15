@@ -6,26 +6,24 @@ import getApi from "@/Components/newsApi";
 import Navbar from "@/Components/navbar";
 import { useRouter } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { debounce } from "lodash"; // 👈 Install: npm install lodash
 
 export default function ClientApp() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [Country, setCountry] = useState("pk");
+  const [user, setUser] = useState(null);
+  const [loader, setLoader] = useState(false);
   const router = useRouter();
 
-  // 👇 Debounce search
-  const debouncedSearch = useMemo(
-    () =>
-      debounce((value) => {
-        setDebouncedQuery(value);
-      }, 500),
-    []
-  );
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const handleSearch = (finalQuery) => {
-    setSearchQuery(finalQuery);
-    debouncedSearch(finalQuery);
+    setInputValue(finalQuery);
   };
 
   const {
@@ -36,37 +34,34 @@ export default function ClientApp() {
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: ["news", debouncedQuery, Country],
+    queryKey: ["news", inputValue || "latest", Country , loader],
     queryFn: async ({ pageParam = null }) => {
-      const result = await getApi(
-        debouncedQuery || "latest",
-        Country,
-        pageParam
-      );
-      console.log(result);
+      const result = await getApi(inputValue || "latest", Country, pageParam);
 
       if (
         result?.error &&
         result?.message?.toLowerCase()?.includes("api credits")
-      )
-    //   ) {
-    //     router.push("/error/429");
-    //     return { articles: [], nextPage: false };
-    //   }
+      ) {
+        router.push("/error/429");
+        return { articles: [], nextPage: false };
+      }
 
-    //   if (result?.error && result?.code === 429) {
-    //     router.push("/error/429");
-    //     return { articles: [], nextPage: false };
-    //   }
+      if (result?.error && result?.code === 429) {
+        router.push("/error/429");
+        return { articles: [], nextPage: false };
+      }
 
       if (result?.error && result?.code === 500) {
         router.push("/error/500");
         return { articles: [], nextPage: false };
       }
-
       return result;
     },
     getNextPageParam: (lastPage) => lastPage.nextPage || false,
+
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   const articles = data?.pages?.flatMap((page) => page.articles) || [];
@@ -90,92 +85,52 @@ export default function ClientApp() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasNextPage, isFetchingNextPage]);
 
+  useEffect(() => {
+    const GetUser = async () => {
+      try {
+        const res = await fetch("/api/me");
+        const data = await res.json();
+        if (data.success) {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.log("Error While Fetching: " , error);
+        
+      }
+    };
+    GetUser();
+  }, []);
+
   return (
     <>
+      <Navbar
+        searchClick={handleSearch}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        country={Country}
+        setCountry={setCountry}
+        setFinalValue={setInputValue}
+        user={user}
+        setUser={setUser}
+        setLoader={setLoader}
+      />
+
       {isLoading ? (
-        <div
-          style={{
-            background: "white",
-            height: "100vh",
-            width: "100vw",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            zIndex: 9999,
-            flexDirection: "column",
-          }}
-        >
-          <div
-            style={{
-              position: "relative",
-              width: "100px",
-              height: "100px",
-            }}
-          >
-            <img
-              src="/logoImg.png"
-              alt="NewsIcon"
-              style={{
-                width: "70px",
-                height: "50px",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                background: "#0000",
-                transform: "translate(-50%, -50%)",
-                zIndex: 2,
-                animation: "float 2s ease-in-out infinite",
-              }}
-            />
-
-            <div
-              className="spinner-border text-success"
-              role="status"
-              style={{
-                width: "100px",
-                height: "100px",
-                borderWidth: "6px",
-              }}
-            />
-          </div>
-
-          <style jsx>{`
-            @keyframes float {
-              0% {
-                transform: translate(-50%, -50%) translateY(0);
-              }
-              50% {
-                transform: translate(-50%, -50%) translateY(-10px);
-              }
-              100% {
-                transform: translate(-50%, -50%) translateY(0);
-              }
-            }
-          `}</style>
-        </div>
+        <Post
+          newsData={articles}
+          scrollLoading={isFetchingNextPage}
+          loading={true}
+          hasNextPage={hasNextPage}
+        />
+      ) : articles.length > 0 ? (
+        <Post
+          newsData={articles}
+          scrollLoading={isFetchingNextPage}
+          loading={false}
+          hasNextPage={hasNextPage}
+        />
       ) : (
-        <>
-          <Navbar
-            searchClick={handleSearch}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            country={Country}
-            setCountry={setCountry}
-          />
-
-          {articles.length > 0 ? (
-            <Post
-              newsData={articles}
-              loading={isFetchingNextPage}
-              hasNextPage={hasNextPage}
-            />
-          ) : (
-            <p className="mt-3 text-muted">No articles available</p>
-          )}
-        </>
+        <p className="mt-3 text-muted">No articles available</p>
       )}
     </>
   );
