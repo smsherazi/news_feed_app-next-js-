@@ -100,7 +100,7 @@ export default function Login() {
         <div className="text-center">
           <Link href="/signup">
             <p className="text-success">
-              <span>if you don't have an account! </span> Sign-Up
+              <span>if you don&apos;t have an account! </span> Sign-Up
             </p>
           </Link>
         </div>

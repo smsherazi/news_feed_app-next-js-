@@ -46,7 +46,7 @@ export default function ProfileDropdown({ userData, setUser, setLoader, setClose
       setFirstChar(char);
       setBgColor(randomColor);
     }
-  }, [userData.name]);
+  }, [userData.name, bgColors]);
 
   async function onSave(payload) {
     try {
