@@ -25,7 +25,7 @@ export async function GET(req) {
     });
   }
 
-  const keys = process.env.NEWSDATA_API_KEYS?.split(",") || [];
+  const keys = process.env.NEXT_PUBLIC_NEWSDATA_API_KEYS?.split(",") || [];
   let data = null;
   let usedKey = null;
 
