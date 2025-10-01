@@ -1,7 +1,8 @@
-export default async function getApi(q, country, nextPageToken) {
+export default async function getApi(q, country, nextPageToken,language,category) {
   try {
-    let url = `/api/news?q=${encodeURIComponent(q)}&country=${country}`;
+    let url = `/api/news?q=${encodeURIComponent(q)}&country=${country}&language=${language}`;
     if (nextPageToken) url += `&nextPage=${nextPageToken}`;
+    if (category) url += `&nextPage=${nextPageToken}`;
 
     const res = await fetch(url);
     const data = await res.json();

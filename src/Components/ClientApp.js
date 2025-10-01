@@ -1,29 +1,31 @@
-"use client";
+'use client';
 
 import Post from "@/Components/post";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import getApi from "@/Components/newsApi";
 import Navbar from "@/Components/navbar";
 import { useRouter } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import AiNewsSearch from "./AiNewsSearch";
 
 export default function ClientApp() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [inputValue, setInputValue] = useState("");
-  const [Country, setCountry] = useState("pk");
+  const [searchQuery, setSearchQuery] = useState("latest");
+  const [country, setCountry] = useState("pk");
   const [user, setUser] = useState(null);
   const [loader, setLoader] = useState(false);
+
   const router = useRouter();
 
-  useEffect(() => {
-    document.body.style.overflow = "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
+  const fetchNews = async ({ pageParam = null }) => {
+    const result = await getApi(searchQuery || "latest", country, pageParam, "en");
 
-  const handleSearch = (finalQuery) => {
-    setInputValue(finalQuery);
+    if (result?.error) {
+      if (result?.code === 429) router.push("/error/429");
+      else if (result?.code === 500) router.push("/error/500");
+      return { articles: [], nextPage: false };
+    }
+
+    return result;
   };
 
   const {
@@ -31,37 +33,12 @@ export default function ClientApp() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
-    isError,
+    isLoading
   } = useInfiniteQuery({
-    queryKey: ["news", inputValue || "latest", Country , loader],
-    queryFn: async ({ pageParam = null }) => {
-      const result = await getApi(inputValue || "latest", Country, pageParam);
-
-      if (
-        result?.error &&
-        result?.message?.toLowerCase()?.includes("api credits")
-      ) {
-        router.push("/error/429");
-        return { articles: [], nextPage: false };
-      }
-
-      if (result?.error && result?.code === 429) {
-        router.push("/error/429");
-        return { articles: [], nextPage: false };
-      }
-
-      if (result?.error && result?.code === 500) {
-        router.push("/error/500");
-        return { articles: [], nextPage: false };
-      }
-      return result;
-    },
+    queryKey: ["news", searchQuery, country, loader],
+    queryFn: fetchNews,
     getNextPageParam: (lastPage) => lastPage.nextPage || false,
-
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+    refetchOnWindowFocus: false
   });
 
   const articles = data?.pages?.flatMap((page) => page.articles) || [];
@@ -90,26 +67,27 @@ export default function ClientApp() {
       try {
         const res = await fetch("/api/me");
         const data = await res.json();
-        if (data.success) {
-          setUser(data.user);
-        }
+        if (data.success) setUser(data.user);
       } catch (error) {
-        console.log("Error While Fetching: " , error);
-        
+        console.log("Error While Fetching: ", error);
       }
     };
     GetUser();
   }, []);
 
+  const handleSearchChange = (query, countryCode) => {
+    setSearchQuery(query || "latest");
+    setCountry(countryCode);
+  };
+
   return (
     <>
+      <AiNewsSearch />
       <Navbar
-        searchClick={handleSearch}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        country={Country}
+        onSearchChange={handleSearchChange}
+        country={country}
         setCountry={setCountry}
-        setFinalValue={setInputValue}
+        isSavedPage={false}
         user={user}
         setUser={setUser}
         setLoader={setLoader}
@@ -121,6 +99,7 @@ export default function ClientApp() {
           scrollLoading={isFetchingNextPage}
           loading={true}
           hasNextPage={hasNextPage}
+          layout="timeline"
         />
       ) : articles.length > 0 ? (
         <Post
@@ -128,6 +107,7 @@ export default function ClientApp() {
           scrollLoading={isFetchingNextPage}
           loading={false}
           hasNextPage={hasNextPage}
+          layout="timeline"
         />
       ) : (
         <p className="mt-3 text-muted">No articles available</p>

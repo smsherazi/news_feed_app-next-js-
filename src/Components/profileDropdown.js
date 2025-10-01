@@ -185,7 +185,7 @@ export default function ProfileDropdown({ userData, setUser, setLoader, setClose
               <button onClick={() => setShowModal("edit")}>
                 Edit Profile <MdEdit />
               </button>
-              <Link href={""}>
+              <Link href={"/savednews"}>
                 Library <MdOutlineLibraryBooks />
               </Link>
               <Link href={""}>

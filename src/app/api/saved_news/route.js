@@ -5,19 +5,33 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const q = searchParams.get("q") || "";
+  const country = searchParams.get("country") || "";
+
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   const decode = jwt.decode(token);
   const userId = decode?.id;
-  mongoose.connect(ConnectionStr);
 
-  const news = await SavedNews.find({userId});
+  await mongoose.connect(ConnectionStr);
 
-  console.log(news);
+  const filter = { userId };
+  if (q) filter.title = { $regex: q, $options: "i" };
+  if (country) filter.country = country;
 
-  return NextResponse.json({ success: true, result: news });
+  const news = await SavedNews.find(filter).lean();
+
+  const formatted = news.map(item => ({
+    ...item,
+    id: item.savedNewsId,
+    saved: true
+  }));
+
+  return NextResponse.json({ success: true, result: formatted });
 }
+
 
 export async function POST(req) {
   try {
@@ -26,7 +40,7 @@ export async function POST(req) {
 
     if (!token) {
       return NextResponse.redirect(
-        new URL("/login?msg=auth_required", req.url)
+        new URL("/login", req.url)
       );
     }
 
@@ -41,13 +55,13 @@ export async function POST(req) {
 
     const {savedNewsId} = payload;
 
-    const alreadySaved = await SavedNews.findOne({savedNewsId})
+    await mongoose.connect(ConnectionStr);
+
+    const alreadySaved = await SavedNews.findOne({savedNewsId, userId})
 
     if(alreadySaved){
       return NextResponse.json({success: false, message: "already Saved!"})
     }
-
-    await mongoose.connect(ConnectionStr);
 
     const savedNews = new SavedNews({
       ...payload,
@@ -75,6 +89,10 @@ export async function DELETE(req) {
   const userId = decode?.id;
 
   await mongoose.connect(ConnectionStr);
-  const deleted = await SavedNews.deleteOne({ savedNewsId, userId });
+
+  // delete all duplicates with same savedNewsId for this user
+  const deleted = await SavedNews.deleteMany({ savedNewsId, userId });
+
   return NextResponse.json({ success: deleted.deletedCount > 0 });
 }
+

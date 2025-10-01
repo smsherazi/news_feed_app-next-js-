@@ -9,8 +9,12 @@ const cache = new Map(); // key: `${q}-${country}-${nextPage}`, value: { data, e
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const q = searchParams.get("q") || "latest";
-  const country = searchParams.get("country") || "pk";
+const q = searchParams.get("q") || "latest";
+const country = searchParams.get("country") || "pk";
+const category = searchParams.get("category") || "";   // ✅ new
+const language = searchParams.get("language") || "en"; // ✅ new
+const fromDate = searchParams.get("from_date") || "";  // ✅ new
+const toDate = searchParams.get("to_date") || "";      // ✅ new  
   const nextPage = searchParams.get("nextPage");
 
   const cacheKey = `${q}-${country}-${nextPage}`;
@@ -33,8 +37,11 @@ export async function GET(req) {
 
   // 🔁 Try all keys until success1`
   for (const key of keys) {
-    let apiUrl = `https://newsdata.io/api/1/news?apikey=${key}&q=${encodeURIComponent(q)}&country=${country}&language=en`;
-    if (nextPage) apiUrl += `&page=${encodeURIComponent(nextPage)}`;
+    let apiUrl = `https://newsdata.io/api/1/news?apikey=${key}&q=${encodeURIComponent(q)}&country=${country}&language=${language}`;
+if (category) apiUrl += `&category=${category}`;
+if (fromDate) apiUrl += `&from_date=${fromDate}`;
+if (toDate) apiUrl += `&to_date=${toDate}`;
+if (nextPage) apiUrl += `&page=${encodeURIComponent(nextPage)}`;
 
     try {
       const response = await fetch(apiUrl);
@@ -99,6 +106,7 @@ export async function GET(req) {
 
     const updatedArticles = (data.results || []).map((article) => ({
       ...article,
+      id: article.article_id,
       saved: saveIds.has(article.article_id),
     }));
 
