@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Post from "@/Components/post";
 import { useEffect, useState } from "react";
@@ -7,17 +7,26 @@ import Navbar from "@/Components/navbar";
 import { useRouter } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import AiNewsSearch from "./AiNewsSearch";
+import "@/Component Css/SidebarCategory.css";
+import CategoriesSidebar from "./SidebarCategory";
 
 export default function ClientApp() {
   const [searchQuery, setSearchQuery] = useState("latest");
   const [country, setCountry] = useState("pk");
   const [user, setUser] = useState(null);
   const [loader, setLoader] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("latest");
 
   const router = useRouter();
 
   const fetchNews = async ({ pageParam = null }) => {
-    const result = await getApi(searchQuery || "latest", country, pageParam, "en");
+    const result = await getApi(
+      selectedCategory || searchQuery || "latest", // q me category bhejna
+      country,
+      pageParam,
+      "en"
+      // category parameter remove
+    );
 
     if (result?.error) {
       if (result?.code === 429) router.push("/error/429");
@@ -33,9 +42,11 @@ export default function ClientApp() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading
+    isLoading,
+    remove,
+    refetch
   } = useInfiniteQuery({
-    queryKey: ["news", searchQuery, country, loader],
+    queryKey: ["news", searchQuery, country, selectedCategory],
     queryFn: fetchNews,
     getNextPageParam: (lastPage) => lastPage.nextPage || false,
     refetchOnWindowFocus: false
@@ -43,6 +54,7 @@ export default function ClientApp() {
 
   const articles = data?.pages?.flatMap((page) => page.articles) || [];
 
+  // Infinite Scroll
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = document.documentElement.scrollTop;
@@ -62,7 +74,10 @@ export default function ClientApp() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Fetch user
   useEffect(() => {
+    window.scrollTo(0, 0);
+    document.body.style.overflowY = "auto";
     const GetUser = async () => {
       try {
         const res = await fetch("/api/me");
@@ -75,14 +90,40 @@ export default function ClientApp() {
     GetUser();
   }, []);
 
+  const handleAiResult = (fields) => {
+    setSearchQuery(fields.q || "latest");
+    setCountry(fields.country || "pk");
+    setLoader((prev) => !prev);
+    remove();
+    refetch();
+  };
+
   const handleSearchChange = (query, countryCode) => {
     setSearchQuery(query || "latest");
     setCountry(countryCode);
+    setLoader((prev) => !prev);
+    remove();
+    refetch();
+  };
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setLoader((prev) => !prev);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    remove(); // Clear old data
+    refetch(); // Fetch new category data
   };
 
   return (
     <>
-      <AiNewsSearch />
+      <CategoriesSidebar
+        selectedCategory={selectedCategory}
+        onSelectCategory={handleCategorySelect}
+      />
+
+      <AiNewsSearch onResult={handleAiResult} />
+
       <Navbar
         onSearchChange={handleSearchChange}
         country={country}

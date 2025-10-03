@@ -6,32 +6,33 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
 export async function GET(req) {
-  const { searchParams } = new URL(req.url);
-  const q = searchParams.get("q") || "";
-  const country = searchParams.get("country") || "";
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    const decode = jwt.decode(token);
+    const userId = decode?.id;
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-  const decode = jwt.decode(token);
-  const userId = decode?.id;
+    if (!userId) {
+      return NextResponse.json({ success: false, result: [] });
+    }
 
-  await mongoose.connect(ConnectionStr);
+    await mongoose.connect(ConnectionStr);
 
-  const filter = { userId };
-  if (q) filter.title = { $regex: q, $options: "i" };
-  if (country) filter.country = country;
+    // ✅ Bas user ke saved news nikal lo
+    const news = await SavedNews.find({ userId }).lean();
 
-  const news = await SavedNews.find(filter).lean();
+    const formatted = news.map(item => ({
+      ...item,
+      id: item.savedNewsId,
+      saved: true,
+    }));
 
-  const formatted = news.map(item => ({
-    ...item,
-    id: item.savedNewsId,
-    saved: true
-  }));
-
-  return NextResponse.json({ success: true, result: formatted });
+    return NextResponse.json({ success: true, result: formatted });
+  } catch (err) {
+    console.error("❌ Error in GET /api/saved_news:", err);
+    return NextResponse.json({ success: false, result: [] });
+  }
 }
-
 
 export async function POST(req) {
   try {
@@ -52,6 +53,8 @@ export async function POST(req) {
     }
 
     const payload = await req.json();
+    console.log(payload);
+    
 
     const {savedNewsId} = payload;
 
@@ -66,9 +69,12 @@ export async function POST(req) {
     const savedNews = new SavedNews({
       ...payload,
       userId: userId,
+      country: payload.country || "pakistan"
     });
 
     const result = await savedNews.save();
+    console.log(result);
+    
 
     return NextResponse.json({ result, success: true });
   } catch (error) {

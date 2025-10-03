@@ -44,7 +44,7 @@ export default function Login() {
         setLoader(false)
       } else {
         setLoader(false);
-        router.push("/");
+        router.replace("/");
         window.scrollTo(0, 0);
         alert("login Successsfullty!");
       }

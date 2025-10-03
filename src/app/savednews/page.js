@@ -5,11 +5,13 @@ import Post from "@/Components/post";
 import { useState, useEffect } from "react";
 
 export default function SavedNews() {
-  const [savedArticles, setSavedArticles] = useState([]);
+  const [allArticles, setAllArticles] = useState([]);   
+  const [savedArticles, setSavedArticles] = useState([]); 
   const [searchQuery, setSearchQuery] = useState("");
-  const [country, setCountry] = useState("pk");
+  const [country, setCountry] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [availableCountries, setAvailableCountries] = useState([]); // ✅ unique countries
 
   const fetchUser = async () => {
     try {
@@ -21,16 +23,19 @@ export default function SavedNews() {
     }
   };
 
-  const fetchSaved = async (query = "", countryCode = "") => {
+  const fetchSaved = async () => {
     setLoading(true);
     try {
-      let url = `/api/saved_news?`;
-      if (query) url += `q=${encodeURIComponent(query)}&`;
-      if (countryCode) url += `country=${encodeURIComponent(countryCode)}`;
-
-      const res = await fetch(url);
+      const res = await fetch("/api/saved_news");  
       const data = await res.json();
-      if (data.success) setSavedArticles(data.result);
+      if (data.success) {
+        setAllArticles(data.result); 
+        setSavedArticles(data.result); 
+
+        // ✅ extract unique countries dynamically
+        const uniqueCountries = [...new Set(data.result.map(a => a.country))];
+        setAvailableCountries(uniqueCountries);
+      }
     } catch (err) {
       console.error("Error fetching saved news:", err);
     } finally {
@@ -38,15 +43,36 @@ export default function SavedNews() {
     }
   };
 
+  // ✅ search + country filter apply
+  useEffect(() => {
+    let filtered = [...allArticles];
+
+    // ✅ keyword search (title + description dono)
+    if (searchQuery.trim()) {
+      const lower = searchQuery.toLowerCase();
+      filtered = filtered.filter(article =>
+        (article.title && article.title.toLowerCase().includes(lower)) ||
+        (article.description && article.description.toLowerCase().includes(lower))
+      );
+    }
+
+    // ✅ country filter
+    if (country) {
+      filtered = filtered.filter(article => article.country === country);
+    }
+
+    setSavedArticles(filtered);
+  }, [searchQuery, country, allArticles]);
+
+
   useEffect(() => {
     fetchUser();
-    fetchSaved();
+    fetchSaved(); 
   }, []);
 
   const handleSearchChange = (query, countryCode) => {
     setSearchQuery(query);
     setCountry(countryCode);
-    fetchSaved(query, countryCode);
   };
 
   return (
@@ -55,9 +81,10 @@ export default function SavedNews() {
         onSearchChange={handleSearchChange}
         country={country}
         setCountry={setCountry}
-        isSavedPage={true}
+        isSavedPage={true}   // ✅ saved page hai
         user={user}
         setUser={setUser}
+        availableCountries={availableCountries}
       />
       <div className="container mt-5">
         <h4 className="mb-5 text-white display-4 fw-bold">Saved News</h4>
@@ -65,7 +92,7 @@ export default function SavedNews() {
           newsData={savedArticles}
           loading={loading}
           layout="grid"
-          onRefresh={() => fetchSaved(searchQuery, country)}
+          onRefresh={fetchSaved}
         />
       </div>
     </>

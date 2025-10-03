@@ -51,6 +51,9 @@ const savedNewsModel = mongoose.Schema({
   savedAt: {
     type: Date,
     default: Date.now
+  },
+  country: {
+    type: String,
   }
 })
-export const SavedNews = mongoose.models.saved_news || mongoose.model("saved_news",savedNewsModel);
+export const SavedNews = mongoose.models.SavedNews || mongoose.model("SavedNews",savedNewsModel);

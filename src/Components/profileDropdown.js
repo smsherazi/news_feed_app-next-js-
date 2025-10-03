@@ -174,7 +174,7 @@ export default function ProfileDropdown({ userData, setUser, setLoader, setClose
     <>
       <div className="profile">
       <div className="profileIcon " style={{ backgroundColor: bgColor }}>
-        <h4>{firstChar}</h4>
+        <h6>{firstChar}</h6>
         <span onClick={() => setShowDropdown(!showDropdown)}>
           <IoIosArrowDropdownCircle />
         </span>
@@ -189,7 +189,7 @@ export default function ProfileDropdown({ userData, setUser, setLoader, setClose
                 Library <MdOutlineLibraryBooks />
               </Link>
               <Link href={""}>
-                Your Picks <GiNewspaper />
+                Your Picks <GiNewspaper />  
               </Link>
               <Link href={""}>
                 Privacy Policy <MdPrivacyTip />

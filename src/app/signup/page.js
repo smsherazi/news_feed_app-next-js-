@@ -45,7 +45,7 @@ export default function Signup() {
         setLoader(false)
       }
       else{
-        router.push("/")
+        router.replace("/")
         window.scrollTo(0, 0);
         alert(result.message)
         setLoader(false)
