@@ -386,7 +386,7 @@ export default function Post({
       )}
       {!loading && newsData?.length > 0 && hasNextPage === false && (
         <div className="text-center mt-4 text-muted small">
-          <p>You've reached the end of the news list.</p>
+          <p>You&apos;ve reached the end of the news list.</p>
         </div>
       )}
     </div>
