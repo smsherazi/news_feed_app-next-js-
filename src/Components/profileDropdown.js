@@ -188,12 +188,6 @@ export default function ProfileDropdown({ userData, setUser, setLoader, setClose
               <Link href={"/savednews"}>
                 Library <MdOutlineLibraryBooks />
               </Link>
-              <Link href={""}>
-                Your Picks <GiNewspaper />  
-              </Link>
-              <Link href={""}>
-                Privacy Policy <MdPrivacyTip />
-              </Link>
               <button onClick={() => setShowModal("password")}>
                 Change Password
                 <RiLockPasswordFill />
