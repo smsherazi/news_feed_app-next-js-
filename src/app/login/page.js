@@ -1,10 +1,10 @@
 "use client";
 
 import "@/Component Css/login.css";
-import { redirect } from "next/dist/server/api-utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,22 +12,29 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loader, setLoader] = useState(false);
 
-
   const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
   const router = useRouter();
 
+  useEffect(() => {
+    const toastMessage = sessionStorage.getItem("toastMessage");
+    if (toastMessage) {
+      toast.error(toastMessage, { duration: 4000 });
+      sessionStorage.removeItem("toastMessage");
+    }
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (email == "") {
+    if (email === "") {
       setError("All fields are required!");
     } else if (!emailRegex.test(email)) {
-      setError("invalid email format!");
-    } else if (password == "") {
+      setError("Invalid email format!");
+    } else if (password === "") {
       setError("All fields are required!");
     } else if (password.length < 8) {
-      setError("password at least 8 characters!");
+      setError("Password must be at least 8 characters!");
     } else {
       setLoader(true);
       let loginUser = await fetch("/api/loginuser", {
@@ -41,12 +48,12 @@ export default function Login() {
 
       if (loginUser.error) {
         setError(loginUser.error);
-        setLoader(false)
+        setLoader(false);
       } else {
         setLoader(false);
         router.replace("/");
         window.scrollTo(0, 0);
-        alert("login Successsfullty!");
+        toast.success("Login Successful!");
       }
     }
   };
@@ -54,7 +61,6 @@ export default function Login() {
   return (
     <>
       <div className="loginBox">
-        {/* <img className="user" src="https://i.ibb.co/yVGxFPR/2.png" height="100px" width="100px"/> */}
         <h3 className="text-success">Sign in here</h3>
         <form method="post">
           <div className="inputBox">
@@ -93,14 +99,11 @@ export default function Login() {
             )}
           </button>
         </form>
-        <a href="#">
-          Forget Password
-          <br />{" "}
-        </a>
+        <Link href="/verifyemail">Forget Password</Link>
         <div className="text-center">
           <Link href="/signup">
             <p className="text-success">
-              <span>if you don&apos;t have an account! </span> Sign-Up
+              <span>If you don&apos;t have an account! </span> Sign-Up
             </p>
           </Link>
         </div>

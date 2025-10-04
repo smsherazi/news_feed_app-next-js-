@@ -7,27 +7,34 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: "Missing query input" }), { status: 400 });
     }
 
-    const prompt = `
-You are an intelligent JSON extractor for news queries.
-Your job is to output a STRICT JSON object only. 
-Do not include comments or text outside JSON.
+const prompt = `
+You are a keyword extractor for news searches.
+Return a STRICT JSON object with only keywords for the field "q".
+Do not include extra sentences or explanations.
 
-The JSON must contain these fields:
+The JSON must contain:
 {
-  "q": "...",
+  "q": "...",         // Only 2–3 short, highly relevant keywords
   "country": "...",
-  "category": "...",
+  "category": "",
   "language": "...",
-  "from_date": "...",
-  "to_date": "..."
+  "from_date": "",
+  "to_date": ""
 }
 
 Rules:
-- Dates must be in YYYY-MM-DD format if determinable.
-- If no date is allowed, return empty string "".
+- Extract ONLY the most important keywords from the query.
+- Output between 2 and 3 keywords maximum.
+- Remove stop words (like 'ki', 'ka', 'the', 'of', etc.).
+- Keywords must be lowercase unless proper nouns.
+- Use the fewest words possible that capture the main intent.
+- Category must always be empty "".
+- Dates must be in YYYY-MM-DD format if present.
 - Country and language must be ISO codes.
+
 Query: "${query}"
 `;
+
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -68,9 +75,9 @@ Query: "${query}"
     // Ensure safe defaults
     fields.q = fields.q || query;
     fields.country = fields.country || "pk";
-    fields.category = fields.category || "";
+    fields.category = ""; // ✅ Always empty
     fields.language = fields.language || "en";
-    fields.from_date = ""; // Dates ignored for free API
+    fields.from_date = "";
     fields.to_date = "";
 
     return new Response(JSON.stringify(fields), { status: 200 });

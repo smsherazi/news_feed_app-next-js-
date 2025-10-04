@@ -83,12 +83,6 @@ const AiNewsSearch = ({onResult}) => {
           </button>
         )}
       </form>
-
-      {result && (
-        <pre className={styles.responseBox}>
-          {JSON.stringify(result, null, 2)}
-        </pre>
-      )}
     </div>
   );
 };

@@ -1,34 +1,28 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers"; // ✅ cookies access karne ke liye
 
 export async function middleware(request) {
   const url = request.nextUrl;
   const pathname = url.pathname;
 
-  // ✅ yeh pages direct open nahi hone chahiye
-  const protectedPages = ["/error/429", "/error/500"];
+  const referer = request.headers.get("referer");
 
-  if (protectedPages.includes(pathname)) {
-    const referer = request.headers.get("referer");
-
-    if (!referer) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  // Block direct access to verifyemail
+  if (pathname === "/verifyemail" && !referer) {
+    url.pathname = "/showToast";
+    url.searchParams.set("message", "Please start the forget password process from Login.");
+    return NextResponse.redirect(url);
   }
 
-  // ✅ cookie check
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  // Block direct access to newpassword
+  if (pathname === "/newpassword" && !referer) {
+    url.pathname = "/showToast";
+    url.searchParams.set("message", "You must verify your email first to reset your password from forget password.");
+    return NextResponse.redirect(url);
+  }
 
-  // agar banda logged in hai to login/signup access block karo
+  const token = request.cookies.get("token")?.value;
   if (["/login", "/signup"].includes(pathname) && token) {
     return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  // agar koi aise page pe gaya jaha login required hai aur token nahi hai
-  const needAuthPages = ["/savednews"]; // 👈 apne pages yahan add karo
-  if (needAuthPages.includes(pathname) && !token) {
-    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();

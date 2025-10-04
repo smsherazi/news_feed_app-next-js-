@@ -1,0 +1,159 @@
+.privacy-page {
+  background-color: #02010a;
+  color: white;
+  min-height: 100vh;
+}
+
+.hero {
+  padding: 4rem 1rem;
+  text-align: center;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  animation: fadeIn 1.5s ease forwards;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.privacy-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.mission-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.text-block {
+  flex: 1;
+  animation: fadeUp 1.2s ease forwards;
+}
+
+.image-block {
+  flex: 1;
+  text-align: center;
+}
+
+.image-block img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeUp 1s ease forwards;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  color: #00aaff;
+  margin-bottom: 1rem;
+}
+
+.why-choose-us {
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  animation: fadeUp 1.2s ease forwards;
+}
+
+.why-choose-us h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.why-choose-us ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  margin: 0.5rem;
+  background: #26c57b;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background: #14f5275b;
+}
+
+.hero-buttons,
+.btn-group {
+  margin-top: 1.5rem;
+}
+
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .mission-section {
+    flex-direction: column;
+  }
+
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+}

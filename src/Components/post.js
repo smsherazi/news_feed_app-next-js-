@@ -349,11 +349,7 @@ export default function Post({
                       </a>
 
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        {/* Eye Icon */}
-                        <span className="icon-wrapper" onClick={() => console.log("View clicked")}>
-                          👁️
-                          <span className="tooltip-text">View</span>
-                        </span>
+
 
                         {/* Heart Icon */}
                         <span

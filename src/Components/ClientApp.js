@@ -13,19 +13,24 @@ import CategoriesSidebar from "./SidebarCategory";
 export default function ClientApp() {
   const [searchQuery, setSearchQuery] = useState("latest");
   const [country, setCountry] = useState("pk");
+  const [language, setLanguage] = useState("en");
   const [user, setUser] = useState(null);
   const [loader, setLoader] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("latest");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const router = useRouter();
 
   const fetchNews = async ({ pageParam = null }) => {
     const result = await getApi(
-      selectedCategory || searchQuery || "latest", // q me category bhejna
+      searchQuery || "latest",
       country,
       pageParam,
-      "en"
-      // category parameter remove
+      language || "en",
+      selectedCategory || "",
+      fromDate || "",
+      toDate || ""
     );
 
     if (result?.error) {
@@ -46,7 +51,7 @@ export default function ClientApp() {
     remove,
     refetch
   } = useInfiniteQuery({
-    queryKey: ["news", searchQuery, country, selectedCategory],
+    queryKey: ["news", searchQuery, country, selectedCategory, language, fromDate, toDate],
     queryFn: fetchNews,
     getNextPageParam: (lastPage) => lastPage.nextPage || false,
     refetchOnWindowFocus: false
@@ -54,7 +59,6 @@ export default function ClientApp() {
 
   const articles = data?.pages?.flatMap((page) => page.articles) || [];
 
-  // Infinite Scroll
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = document.documentElement.scrollTop;
@@ -74,10 +78,10 @@ export default function ClientApp() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Fetch user
   useEffect(() => {
     window.scrollTo(0, 0);
     document.body.style.overflowY = "auto";
+
     const GetUser = async () => {
       try {
         const res = await fetch("/api/me");
@@ -93,14 +97,23 @@ export default function ClientApp() {
   const handleAiResult = (fields) => {
     setSearchQuery(fields.q || "latest");
     setCountry(fields.country || "pk");
+    setSelectedCategory(fields.category || "latest");
+    setLanguage(fields.language || "en");
+    setFromDate(fields.from_date || "");
+    setToDate(fields.to_date || "");
     setLoader((prev) => !prev);
+
     remove();
     refetch();
   };
 
   const handleSearchChange = (query, countryCode) => {
     setSearchQuery(query || "latest");
-    setCountry(countryCode);
+
+    // Ensure no duplicates & normalize
+    const normalizedCodes = Array.from(new Set(countryCode.split(",").map(c => c.trim().toLowerCase())));
+    setCountry(normalizedCodes.join(","));
+
     setLoader((prev) => !prev);
     remove();
     refetch();
@@ -111,8 +124,8 @@ export default function ClientApp() {
     setLoader((prev) => !prev);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
-    remove(); // Clear old data
-    refetch(); // Fetch new category data
+    remove();
+    refetch();
   };
 
   return (
@@ -121,8 +134,8 @@ export default function ClientApp() {
         selectedCategory={selectedCategory}
         onSelectCategory={handleCategorySelect}
       />
-
-      <AiNewsSearch onResult={handleAiResult} />
+      {user && <AiNewsSearch onResult={handleAiResult} />
+      }
 
       <Navbar
         onSearchChange={handleSearchChange}
